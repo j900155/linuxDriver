@@ -27,11 +27,16 @@ int main()
 	}
 	close(uio_fd);
 	uio_buf = (char *)pV;
-	strcpy(uio_buf, "hello world");
+	printf("pV 0 %s\n", uio_buf);
+	strcpy(uio_buf, "hello 00");
 	printf("%s\n",uio_buf);
 
 	read(fd, buf, 32);
-	printf("read %s\n", buf);
+	printf("read 0 %s\n", buf);
+	write(fd, "1234", 5);
+	printf("pV 1%s\n", uio_buf);
+	read(fd, buf, 32);
+	printf("read 1 %s\n", buf);
 
 	munmap(pV, 0x40);
 	close(fd);

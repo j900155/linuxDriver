@@ -9,6 +9,7 @@
 #include <linux/device.h>
 #include <linux/platform_device.h>
 #include <linux/slab.h>
+#include <linux/vmalloc.h>
 
 #include <asm/uaccess.h>
 MODULE_LICENSE("GPL");
@@ -17,7 +18,7 @@ MODULE_LICENSE("GPL");
 #define  HELLO_MINORS 2
 
 #define MAX_BUFF 1024
-char data[MAX_BUFF];
+char *data;
 struct uio_info info;
 static struct class *cls;
 static struct platform_device *dummy_device;
@@ -83,10 +84,10 @@ static int uio_probe(struct device *dev)
 	info.irq = UIO_IRQ_NONE;
 	info.name = "myuio";
 	info.mem[0].name = "mem0";
-	info.mem[0].memtype = UIO_MEM_LOGICAL;
-	//info.mem[0].addr = data;
+	info.mem[0].memtype = UIO_MEM_VIRTUAL;
+	//info.mem[0].memtype = UIO_MEM_LOGICAL;
 	info.mem[0].addr = (unsigned long) data;
-	info.mem[0].size = 1024;
+	info.mem[0].size = MAX_BUFF;
 
 	rt =  uio_register_device(dev, &info);
 	
@@ -106,6 +107,8 @@ static int __init hello_init(void)
 	//hello_dev->ops = &ops; 
 	
 	//cdev_init(hello_dev, &ops);
+	//data = (char *)kmalloc(MAX_BUFF, GFP_KERNEL);
+	data = (char *)vmalloc_user(MAX_BUFF);
 	printk(KERN_ALERT "register_chrdev\n");
 	cdev_init(&myDev, &ops);
 	cdev_add(&myDev, MKDEV(HELLO_MAJOR, 0), 1);
